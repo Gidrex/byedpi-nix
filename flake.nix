@@ -4,40 +4,43 @@
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
 
   outputs = { self, nixpkgs }: let
-    pkgs = import nixpkgs { system = "x86_64-linux"; };
+    system = "x86_64-linux";
+    pkgs = import nixpkgs { inherit system; };
   in {
-    packages.x86_64-linux.default = pkgs.stdenv.mkDerivation {
-      pname = "byedpi";
-      version = "1.0.0";
+    packages.${system} = rec {
+      default = pkgs.stdenv.mkDerivation {
+        pname = "byedpi";
+        version = "0.12.0";
 
-      src = pkgs.fetchFromGitHub {
-        owner = "hufrea";
-        repo = "byedpi";
-        rev = "main";
-        sha256 = "tlxK8WWxoWvjftePzEj0P9ZQWHbKbcUlhmpIvji27Bg=";
-      };
+        src = pkgs.fetchFromGitHub {
+          owner = "hufrea";
+          repo = "byedpi";
+          rev = "main";
+          sha256 = "tlxK8WWxoWvjftePzEj0P9ZQWHbKbcUlhmpIvji27Bg=";
+        };
 
-      buildInputs = [ pkgs.gnumake pkgs.gcc ];
+        buildInputs = [ pkgs.gnumake pkgs.gcc ];
 
-      buildPhase = ''
-        make
-      '';
+        buildPhase = ''
+          make
+        '';
 
-      installPhase = ''
-        mkdir -p $out/bin
-        cp ciadpi $out/bin/
-      '';
+        installPhase = ''
+          mkdir -p $out/bin
+          cp ciadpi $out/bin/
+        '';
 
-      meta = with pkgs.lib; {
-        description = "A simple tool to say goodbye to DPI";
-        license = licenses.mit;
-        platforms = platforms.unix;
+        meta = with pkgs.lib; {
+          description = "A simple tool to say goodbye to DPI";
+          license = licenses.mit;
+          platforms = platforms.unix;
+        };
       };
     };
 
-    devShell.x86_64-linux = pkgs.mkShell {
+    devShell.${system} = pkgs.mkShell {
       buildInputs = [
-        self.packages.x86_64-linux.default
+        self.packages.${system}.default
       ];
     };
   };
